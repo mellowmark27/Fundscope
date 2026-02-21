@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FundScope — IA Unit Trusts & OEICs Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@300;400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════
+   FUNDSCOPE — IA Unit Trusts Monitor
+   Aesthetic: Refined financial terminal — deep navy + cream
+   Typography: Playfair Display (display) + JetBrains Mono (data) + Lato (body)
+══════════════════════════════════════════════════════════ */
+:root {
+  --bg:       #0a0f1a;
+  --surface:  #111827;
+  --surface2: #1a2436;
+  --surface3: #1f2d42;
+  --border:   #2a3d56;
+  --border2:  #1e3050;
+
+  --cream:    #f0ead8;
+  --cream2:   #e8e0c8;
+  --cream3:   #d4c9aa;
+
+  --accent:   #e8a04a;      /* warm gold */
+  --accent2:  #5b9bd5;      /* cool blue */
+  --red:      #e05c4a;
+  --green:    #4aaa6a;
+  --muted:    #6a8090;
+  --muted2:   #4a6070;
+
+  /* Decile colours — green to red */
+  --d1: #2a7a3a; --d1t: #c8f0d0;
+  --d2: #3a8a3a; --d2t: #d0f0c8;
+  --d3: #5a9a30; --d3t: #daf0c0;
+  --d4: #8a9a20; --d4t: #eef0b0;
+  --d5: #aa9010; --d5t: #f0e8a0;
+  --d6: #c07820; --d6t: #f0d890;
+  --d7: #c85a28; --d7t: #f0c8a0;
+  --d8: #c84030; --d8t: #f0b8a8;
+  --d9: #c02828; --d9t: #f0a8a0;
+  --d10:#a01820;--d10t: #f09090;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
+  --font-body:    'Lato', sans-serif;
+
+  --sidebar-w: 240px;
+  --topbar-h: 52px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-weight: 300;
+  display: flex;
+  font-size: 14px;
+}
+
+/* ─── SIDEBAR ─────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.25s ease;
+  z-index: 10;
+}
+
+.sidebar-logo {
+  padding: 1.1rem 1.2rem;
+  border-bottom: 1px solid var(--border2);
+  flex-shrink: 0;
+}
+
+.sidebar-logo-mark {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--cream);
+  letter-spacing: 0.02em;
+}
+
+.sidebar-logo-mark span { color: var(--accent); font-style: italic; }
+
+.sidebar-logo-universe {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Main nav */
+.sidebar-nav { flex-shrink: 0; padding: 0.5rem 0; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.55rem 1.2rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+  border: none; background: none; width: 100%; text-align: left;
+  transition: color 0.15s, background 0.15s;
+  position: relative;
+}
+
+.nav-item:hover { color: var(--cream2); background: var(--surface2); }
+.nav-item.active { color: var(--cream); background: var(--surface3); }
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--accent);
+}
+
+.nav-icon { font-size: 0.85rem; opacity: 0.7; width: 16px; text-align: center; }
+.nav-item.active .nav-icon { opacity: 1; }
+
+.nav-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  background: var(--red);
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 10px;
+  display: none;
+}
+.nav-badge.visible { display: inline-block; }
+
+/* Sector list in sidebar */
+.sidebar-section-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  padding: 0.9rem 1.2rem 0.35rem;
+  flex-shrink: 0;
+}
+
+.sidebar-sectors {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.sidebar-sectors::-webkit-scrollbar { width: 4px; }
+.sidebar-sectors::-webkit-scrollbar-track { background: transparent; }
+.sidebar-sectors::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sector-nav-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  width: 100%; text-align: left;
+  background: none; border: none;
+  padding: 0.38rem 1.2rem 0.38rem 1.5rem;
+  font-size: 0.77rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.12s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.sector-nav-item:hover { color: var(--cream2); }
+.sector-nav-item.active { color: var(--accent); }
+
+.sector-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0;
+}
+
+.sector-dot.off { background: var(--border); }
+
+.sidebar-footer {
+  border-top: 1px solid var(--border2);
+  padding: 0.75rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--muted2);
+  flex-shrink: 0;
+}
+
+.status-pulse {
+  display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  margin-right: 5px;
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%,100% { opacity: 1; box-shadow: 0 0 3px var(--green); }
+  50%      { opacity: 0.4; box-shadow: none; }
+}
+
+/* ─── MAIN ─────────────────────────────────────────────── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Topbar */
+.topbar {
+  height: var(--topbar-h);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center;
+  padding: 0 1.5rem; gap: 1rem;
+  flex-shrink: 0;
+}
+
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--cream);
+  flex: 1;
+}
+
+.topbar-controls { display: flex; align-items: center; gap: 0.75rem; }
+
+.week-chip {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--muted);
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.week-chip strong { color: var(--accent2); }
+
+.period-picker {
+  display: flex; gap: 2px;
+}
+
+.period-btn {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  padding: 0.28rem 0.65rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.period-btn:first-child { border-radius: 3px 0 0 3px; }
+.period-btn:last-child  { border-radius: 0 3px 3px 0; }
+.period-btn:hover { color: var(--cream2); border-color: var(--border2); }
+.period-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  font-weight: 500;
+}
+
+.btn {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--accent2);
+  border-color: var(--accent2);
+  color: #fff;
+}
+.btn-primary:hover { background: #4a8bc5; }
+
+.btn-outline {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Content area */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.content-area::-webkit-scrollbar { width: 5px; }
+.content-area::-webkit-scrollbar-track { background: transparent; }
+.content-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.content-inner { padding: 1.5rem; }
+
+/* ─── STAT ROW ─────────────────────────────────────────── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  padding: 1rem 1.1rem;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--cream);
+}
+
+.stat-value.amber { color: var(--accent); }
+.stat-value.blue  { color: var(--accent2); }
+.stat-value.green { color: var(--green); }
+.stat-value.red   { color: var(--red); }
+
+.stat-sub {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+/* ─── SECTION HEADER ───────────────────────────────────── */
+.section-hdr {
+  display: flex; align-items: baseline; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.section-hdr-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--cream);
+}
+
+.section-hdr-meta {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+/* ─── ALERT CARDS ──────────────────────────────────────── */
+.alert-card {
+  display: grid;
+  grid-template-columns: 4px 1fr auto;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.alert-card:hover { border-color: var(--red); }
+.alert-stripe { background: var(--red); }
+.alert-body   { padding: 0.75rem 1rem; }
+.alert-fund   { font-size: 0.88rem; font-weight: 700; color: var(--cream); }
+
+.alert-meta {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.alert-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+
+.chip-drop { background: rgba(224,92,74,0.2); color: #f09080; border: 1px solid rgba(224,92,74,0.4); }
+.chip-info { background: rgba(91,155,213,0.2); color: #90c0f0; border: 1px solid rgba(91,155,213,0.4); }
+.chip-gold { background: rgba(232,160,74,0.2); color: #f0c880; border: 1px solid rgba(232,160,74,0.4); }
+.chip-ok   { background: rgba(74,170,106,0.2); color: #80e0a0; border: 1px solid rgba(74,170,106,0.4); }
+
+.alert-right { padding: 0.75rem 0.75rem; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 4px; }
+
+.no-alerts-box {
+  background: rgba(74,170,106,0.08);
+  border: 1px solid rgba(74,170,106,0.2);
+  border-radius: 3px;
+  padding: 1rem 1.2rem;
+  font-size: 0.83rem;
+  color: #80e0a0;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+
+/* ─── RANKINGS TABLE ───────────────────────────────────── */
+.table-wrapper { overflow-x: auto; }
+
+table.rankings {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+table.rankings th {
+  font-family: var(--font-mono);
+  font-size: 0.57rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky; top: 0;
+  background: var(--bg);
+  z-index: 1;
+}
+
+table.rankings th.r { text-align: right; }
+
+table.rankings td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(42,61,86,0.5);
+  vertical-align: middle;
+}
+
+table.rankings tr { cursor: pointer; transition: background 0.1s; }
+table.rankings tr:hover td { background: var(--surface2); }
+table.rankings tr:last-child td { border-bottom: none; }
+
+.rank-num {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--muted2);
+  text-align: center;
+}
+
+.fund-name { font-weight: 700; color: var(--cream); font-size: 0.82rem; }
+.fund-group { font-family: var(--font-mono); font-size: 0.6rem; color: var(--muted); margin-top: 1px; }
+
+.return-val {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.return-val.pos { color: var(--green); }
+.return-val.neg { color: var(--red); }
+.return-val.nil { color: var(--muted2); }
+
+.decile-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem; font-weight: 500;
+  border-radius: 2px;
+}
+
+.streak-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--accent);
+  margin-left: 3px;
+}
+
+/* ─── LEADERBOARD ──────────────────────────────────────── */
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.lb-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lb-card-head {
+  background: var(--surface3);
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.lb-sector {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent2);
+}
+
+.lb-count {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--muted2);
+}
+
+.lb-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid rgba(42,61,86,0.4);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.lb-row:last-child { border-bottom: none; }
+.lb-row:hover { background: var(--surface2); }
+.lb-row:nth-child(1) { background: rgba(232,160,74,0.05); }
+
+.rank-medal {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+  color: var(--bg);
+}
+
+.medal-1 { background: var(--accent); }
+.medal-2 { background: #8a9a9a; }
+.medal-3 { background: #9a6a3a; }
+
+.lb-fund-name { font-size: 0.78rem; color: var(--cream2); line-height: 1.2; }
+.lb-return {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* ─── SECTOR SELECTOR MODAL ────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 720px;
+  max-width: 95vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-head {
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--cream);
+}
+
+.modal-close {
+  background: none; border: none; color: var(--muted);
+  font-size: 1.2rem; cursor: pointer; padding: 0.25rem;
+  transition: color 0.15s;
+}
+.modal-close:hover { color: var(--cream); }
+
+.modal-search-bar {
+  padding: 0.9rem 1.4rem;
+  border-bottom: 1px solid var(--border2);
+  flex-shrink: 0;
+}
+
+.modal-search {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--cream);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 3px;
+  outline: none;
+}
+
+.modal-search:focus { border-color: var(--accent2); }
+.modal-search::placeholder { color: var(--muted2); }
+
+.modal-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 1.4rem;
+  border-bottom: 1px solid var(--border2);
+  flex-shrink: 0;
+}
+
+.modal-count {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
+.quick-btns { display: flex; gap: 6px; }
+
+.quick-btn {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 0.22rem 0.6rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.quick-btn:hover { color: var(--cream); border-color: var(--accent); }
+
+/* Category filter tabs */
+.cat-tabs {
+  display: flex; gap: 2px; flex-wrap: wrap;
+  padding: 0.5rem 1.4rem;
+  border-bottom: 1px solid var(--border2);
+  flex-shrink: 0;
+}
+
+.cat-tab {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.cat-tab:hover { color: var(--cream2); border-color: var(--border2); }
+.cat-tab.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+/* Sector grid in modal */
+.modal-body { flex: 1; overflow-y: auto; padding: 0.75rem 1.4rem; }
+
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 4px;
+}
+
+.sector-toggle {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface2);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.sector-toggle:hover { border-color: var(--accent2); background: var(--surface3); }
+.sector-toggle.on { border-color: var(--green); background: rgba(74,170,106,0.08); }
+
+.toggle-switch {
+  width: 30px; height: 16px;
+  background: var(--border);
+  border-radius: 8px;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.sector-toggle.on .toggle-switch { background: var(--green); }
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  background: var(--cream);
+  border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: transform 0.2s;
+}
+
+.sector-toggle.on .toggle-switch::after { transform: translateX(14px); }
+
+.toggle-label { font-size: 0.77rem; color: var(--cream2); line-height: 1.2; }
+
+.modal-foot {
+  padding: 0.9rem 1.4rem;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.modal-selected-count {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.modal-selected-count strong { color: var(--accent); }
+
+/* ─── FUND DETAIL PANEL ────────────────────────────────── */
+.detail-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 150;
+  display: flex; justify-content: flex-end;
+  animation: fadeIn 0.18s;
+}
+
+.detail-panel {
+  width: 500px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  animation: panelIn 0.22s ease;
+}
+
+@keyframes panelIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+.detail-head {
+  background: var(--surface3);
+  padding: 1.1rem 1.3rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.detail-fund-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--cream);
+  padding-right: 2rem;
+}
+
+.detail-meta {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.detail-close {
+  position: absolute; top: 0.85rem; right: 1rem;
+  background: none; border: none;
+  color: var(--muted); font-size: 1.1rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.detail-close:hover { color: var(--cream); }
+
+.detail-body { flex: 1; overflow-y: auto; padding: 1.3rem; }
+
+.return-trio {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 3px; overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.return-box {
+  background: var(--surface2);
+  padding: 0.85rem;
+  text-align: center;
+}
+
+.return-box-period {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.return-box-val {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.return-box-decile {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.detail-section-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 1.1rem 0 0.5rem;
+}
+
+/* 52-week history chart */
+.history-bars {
+  display: flex; align-items: flex-end; gap: 2px;
+  height: 64px;
+  margin-bottom: 0.4rem;
+}
+
+.h-bar {
+  flex: 1;
+  border-radius: 1px 1px 0 0;
+  min-height: 4px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.h-bar:hover { opacity: 0.75; }
+
+.history-labels {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--muted2);
+  margin-bottom: 0.75rem;
+}
+
+/* Streak boxes */
+.streak-trio {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 3px; overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.streak-box {
+  background: var(--surface2);
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.streak-period {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.streak-val {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  color: var(--accent);
+}
+
+/* Alert log table */
+.alert-log-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.alert-log-table th {
+  font-family: var(--font-mono); font-size: 0.57rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); text-align: left;
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.alert-log-table td {
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid rgba(42,61,86,0.4);
+  vertical-align: middle;
+}
+.alert-log-table tr:last-child td { border-bottom: none; }
+.alert-log-table tr:hover td { background: var(--surface2); }
+
+/* Sector tab strip */
+.sector-strip {
+  display: flex; gap: 2px; flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.sector-strip-btn {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.sector-strip-btn:hover { color: var(--cream2); border-color: var(--border2); }
+.sector-strip-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+/* Loading */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem; gap: 0.75rem;
+  font-family: var(--font-mono); font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent2);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Pipeline status */
+.pipeline-row {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid rgba(42,61,86,0.4);
+  font-size: 0.8rem;
+}
+
+.pipeline-row:last-child { border-bottom: none; }
+
+.status-icon { font-size: 0.9rem; }
+.ok   { color: var(--green); }
+.fail { color: var(--red); }
+
+.cron-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1rem 1.2rem;
+  margin-top: 1.5rem;
+}
+
+.cron-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.cron-code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent2);
+}
+
+.cron-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .stat-row { grid-template-columns: repeat(3, 1fr); }
+  .detail-panel { width: 100%; }
+}
+
+@media (max-width: 640px) {
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .stat-row .stat-card:nth-child(5) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark">Fund<span>Scope</span></div>
+    <div class="sidebar-logo-universe">IA Unit Trusts &amp; OEICs</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-item active" id="nav-dashboard" onclick="nav('dashboard')">
+      <span class="nav-icon">◈</span> Dashboard
+    </button>
+    <button class="nav-item" id="nav-rankings" onclick="nav('rankings')">
+      <span class="nav-icon">▤</span> Rankings
+    </button>
+    <button class="nav-item" id="nav-leaderboard" onclick="nav('leaderboard')">
+      <span class="nav-icon">◆</span> Top 3 Leaders
+    </button>
+    <button class="nav-item" id="nav-alerts" onclick="nav('alerts')">
+      <span class="nav-icon">⚑</span> Alert Log
+      <span class="nav-badge" id="alert-badge"></span>
+    </button>
+    <button class="nav-item" id="nav-pipeline" onclick="nav('pipeline')">
+      <span class="nav-icon">◎</span> Pipeline
+    </button>
+  </nav>
+
+  <div class="sidebar-section-label">Monitored Sectors</div>
+  <div class="sidebar-sectors" id="sidebar-sectors">
+    <!-- populated by JS -->
+  </div>
+
+  <div class="sidebar-footer">
+    <span class="status-pulse"></span>
+    <span id="footer-status">Loading…</span>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══════════════════════════════════════════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-controls">
+      <div class="week-chip">w/e <strong id="week-label">—</strong></div>
+      <div class="period-picker" id="period-picker">
+        <button class="period-btn" onclick="setPeriod('1m')">1M</button>
+        <button class="period-btn" onclick="setPeriod('3m')">3M</button>
+        <button class="period-btn active" onclick="setPeriod('6m')">6M</button>
+      </div>
+      <button class="btn btn-outline" onclick="openSectorModal()">⚙ Sectors</button>
+      <button class="btn btn-primary" id="run-btn" onclick="triggerPipeline()">▶ Run</button>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div class="content-inner" id="content">
+      <div class="loading"><div class="spinner"></div> Initialising FundScope…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTOR SELECTOR MODAL ════════════════════════════= -->
+<div class="modal-overlay" id="sector-modal" style="display:none" onclick="modalBgClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Configure Monitored Sectors</div>
+      <button class="modal-close" onclick="closeSectorModal()">✕</button>
+    </div>
+
+    <div class="modal-search-bar">
+      <input type="text" class="modal-search" id="sector-search"
+             placeholder="Search IA sectors…"
+             oninput="filterSectorModal()">
+    </div>
+
+    <div class="modal-toolbar">
+      <div class="modal-count" id="modal-count">Showing all 56 IA sectors</div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="quickSelect('equity')">Equity</button>
+        <button class="quick-btn" onclick="quickSelect('bond')">Bond</button>
+        <button class="quick-btn" onclick="quickSelect('mixed')">Mixed</button>
+        <button class="quick-btn" onclick="selectAll(true)">All On</button>
+        <button class="quick-btn" onclick="selectAll(false)">All Off</button>
+      </div>
+    </div>
+
+    <div class="cat-tabs" id="cat-tabs">
+      <button class="cat-tab active" onclick="setCat('all')">All</button>
+      <button class="cat-tab" onclick="setCat('equity')">Equity</button>
+      <button class="cat-tab" onclick="setCat('bond')">Bond / Fixed Income</button>
+      <button class="cat-tab" onclick="setCat('mixed')">Mixed Asset</button>
+      <button class="cat-tab" onclick="setCat('specialist')">Specialist</button>
+      <button class="cat-tab" onclick="setCat('money')">Money Market</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="sector-grid" id="sector-grid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <div class="modal-selected-count">
+        <strong id="modal-selected-n">0</strong> sectors selected for monitoring &amp; alerts
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline" onclick="closeSectorModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSectorSelection()">Apply &amp; Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FUND DETAIL PANEL ═══════════════════════════════ -->
+<div class="detail-overlay" id="detail-overlay" style="display:none" onclick="detailBgClick(event)">
+  <div class="detail-panel">
+    <div class="detail-head" style="position:relative;">
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-fund-name" id="detail-name">—</div>
+      <div class="detail-meta" id="detail-meta">—</div>
+    </div>
+    <div class="detail-body" id="detail-body">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   FUNDSCOPE DASHBOARD v2 — IA Unit Trusts & OEICs
+   Fully self-contained with realistic mock data.
+   Set USE_MOCK=false and configure API_BASE for live data.
+══════════════════════════════════════════════════════════ */
+
+const USE_MOCK = true;
+const API_BASE = 'http://localhost:8000/api';
+
+// ── All 56 IA sectors ─────────────────────────────────────
+const ALL_IA_SECTORS = [
+  { code:"IA Asia Pacific Excluding Japan",       name:"Asia Pacific ex Japan",         cat:"equity" },
+  { code:"IA Asia Pacific Including Japan",       name:"Asia Pacific inc Japan",         cat:"equity" },
+  { code:"IA China/Greater China",                name:"China / Greater China",          cat:"equity" },
+  { code:"IA Commodity/Natural Resources",        name:"Commodity / Natural Resources",  cat:"specialist" },
+  { code:"IA EUR Corporate Bond",                 name:"EUR Corporate Bond",             cat:"bond" },
+  { code:"IA EUR Government Bond",               name:"EUR Government Bond",            cat:"bond" },
+  { code:"IA EUR High Yield Bond",               name:"EUR High Yield Bond",            cat:"bond" },
+  { code:"IA EUR Mixed Bond",                    name:"EUR Mixed Bond",                 cat:"bond" },
+  { code:"IA Europe Excluding UK",               name:"Europe ex UK",                   cat:"equity" },
+  { code:"IA Europe Including UK",               name:"Europe inc UK",                  cat:"equity" },
+  { code:"IA European Smaller Companies",        name:"European Smaller Cos",           cat:"equity" },
+  { code:"IA Financials and Financial Innovation",name:"Financials & Fin Innovation",  cat:"specialist" },
+  { code:"IA Flexible Investment",               name:"Flexible Investment",            cat:"mixed" },
+  { code:"IA Global Corporate Bond",             name:"Global Corporate Bond",          cat:"bond" },
+  { code:"IA Global EM Bonds - Blended",         name:"Global EM Bonds - Blended",     cat:"bond" },
+  { code:"IA Global EM Bonds - Hard Currency",   name:"Global EM Bonds - Hard Ccy",   cat:"bond" },
+  { code:"IA Global EM Bonds - Local Currency",  name:"Global EM Bonds - Local Ccy",  cat:"bond" },
+  { code:"IA Global Emerging Markets",           name:"Global Emerging Markets",       cat:"equity" },
+  { code:"IA Global Equity Income",              name:"Global Equity Income",           cat:"equity" },
+  { code:"IA Global Government Bond",            name:"Global Government Bond",         cat:"bond" },
+  { code:"IA Global High Yield Bond",            name:"Global High Yield Bond",         cat:"bond" },
+  { code:"IA Global Inflation Linked Bond",      name:"Global Inflation Linked Bond",  cat:"bond" },
+  { code:"IA Global Mixed Bond",                 name:"Global Mixed Bond",              cat:"bond" },
+  { code:"IA Global",                            name:"Global",                         cat:"equity" },
+  { code:"IA Healthcare",                        name:"Healthcare",                     cat:"specialist" },
+  { code:"IA India/Indian Subcontinent",         name:"India / Indian Subcontinent",   cat:"equity" },
+  { code:"IA Infrastructure",                    name:"Infrastructure",                 cat:"specialist" },
+  { code:"IA Japan",                             name:"Japan",                          cat:"equity" },
+  { code:"IA Latin America",                     name:"Latin America",                  cat:"equity" },
+  { code:"IA Mixed Investment 0-35% Shares",     name:"Mixed 0-35% Shares",            cat:"mixed" },
+  { code:"IA Mixed Investment 20-60% Shares",    name:"Mixed 20-60% Shares",           cat:"mixed" },
+  { code:"IA Mixed Investment 40-85% Shares",    name:"Mixed 40-85% Shares",           cat:"mixed" },
+  { code:"IA North American Smaller Companies",  name:"N. American Smaller Cos",       cat:"equity" },
+  { code:"IA North America",                     name:"North America",                  cat:"equity" },
+  { code:"IA Property Other",                    name:"Property Other",                 cat:"specialist" },
+  { code:"IA Short Term Money Market",           name:"Short Term Money Market",        cat:"money" },
+  { code:"IA Specialist Bond",                   name:"Specialist Bond",                cat:"bond" },
+  { code:"IA Specialist",                        name:"Specialist",                     cat:"specialist" },
+  { code:"IA Standard Money Market",             name:"Standard Money Market",          cat:"money" },
+  { code:"IA Sterling Corporate Bond",           name:"Sterling Corporate Bond",        cat:"bond" },
+  { code:"IA Sterling High Yield",               name:"Sterling High Yield",            cat:"bond" },
+  { code:"IA Sterling Strategic Bond",           name:"Sterling Strategic Bond",        cat:"bond" },
+  { code:"IA Targeted Absolute Return",          name:"Targeted Absolute Return",       cat:"specialist" },
+  { code:"IA Technology & Technology Innovation",name:"Technology & Tech Innovation",  cat:"specialist" },
+  { code:"IA UK All Companies",                  name:"UK All Companies",               cat:"equity" },
+  { code:"IA UK Direct Property",               name:"UK Direct Property",             cat:"specialist" },
+  { code:"IA UK Equity Income",                  name:"UK Equity Income",               cat:"equity" },
+  { code:"IA UK Gilts",                          name:"UK Gilts",                       cat:"bond" },
+  { code:"IA UK Index Linked Gilts",             name:"UK Index Linked Gilts",          cat:"bond" },
+  { code:"IA UK Smaller Companies",              name:"UK Smaller Companies",           cat:"equity" },
+  { code:"IA USD Corporate Bond",                name:"USD Corporate Bond",             cat:"bond" },
+  { code:"IA USD Government Bond",               name:"USD Government Bond",            cat:"bond" },
+  { code:"IA USD High Yield Bond",               name:"USD High Yield Bond",            cat:"bond" },
+  { code:"IA USD Mixed Bond",                    name:"USD Mixed Bond",                 cat:"bond" },
+  { code:"IA Unclassified",                      name:"Unclassified",                   cat:"specialist" },
+  { code:"IA Volatility Managed",                name:"Volatility Managed",             cat:"mixed" },
+];
+
+// Default monitored set
+const DEFAULT_MONITORED = new Set([
+  "IA UK All Companies","IA UK Equity Income","IA UK Smaller Companies",
+  "IA Global","IA Global Equity Income","IA Global Emerging Markets",
+  "IA North America","IA Flexible Investment","IA Mixed Investment 40-85% Shares",
+  "IA Sterling Strategic Bond","IA Infrastructure",
+]);
+
+// ── App state ─────────────────────────────────────────────
+const S = {
+  view:            'dashboard',
+  period:          '6m',
+  monitored:       new Set(DEFAULT_MONITORED),
+  selectedSector:  null,
+  weekDate:        null,
+  rankings:        {},    // code → [fund,…]
+  top3:            {},    // code → [fund,…]
+  alerts:          [],
+  modalCat:        'all',
+  modalPendingSet: null,  // temp state during modal editing
+  detailFund:      null,
+};
+
+// ── Mock data engine ──────────────────────────────────────
+const FUND_POOLS = {
+  "IA UK All Companies":["Liontrust Special Situations","Fidelity Special Situations","Artemis UK Select","Schroder Recovery","Jupiter UK Special Situations","Man GLG UK Income","Invesco UK Equity High Income","JOHCM UK Equity Income","Trojan Income","Evenlode Income","Royal London UK Equity Income","Threadneedle UK","Schroders UK Opportunities","Rathbone UK Opportunities","Ninety One UK Alpha","abrdn UK Opportunities","BNY Mellon UK Income","Dimensional UK Core Equity","L&G UK Index","Vanguard FTSE UK All Share","iShares UK Equity Index","HSBC FTSE All Share Index","Fidelity Index UK","Liontrust UK Growth","Artemis UK"],
+  "IA UK Equity Income":["City of London Equity","Murray Income","Edinburgh Investment","Law Debenture","Trojan Income","Evenlode Income","Royal London UK Equity Income","Man GLG UK Income","Schroder Income","Invesco UK Equity High Income","JOHCM UK Equity Income","Finsbury Growth & Income","Henderson UK Equity Income","Artemis Income","M&G Dividend","Standard Life UK Equity Income Unconstrained","Vanguard FTSE UK Equity Income Index","iShares UK Dividend","Chelverton UK Equity Income","BlackRock UK Income"],
+  "IA Global":["Fundsmith Equity","Baillie Gifford Global Discovery","Rathbone Global Opportunities","Morgan Stanley Global Brands","Artemis Global Income","Ninety One Global Special Situations","Liontrust Global Growth","Fidelity Global Focus","Brown Advisory Global Leaders","Polar Capital Global Technology","Vanguard Global Stock Index","HSBC Global Strategy Dynamic","Dimensional Global Core Equity","L&G Global 100 Index","iShares Global Equity Index","Blue Whale Growth","GQG Partners Global Equity","T. Rowe Price Global Growth","Comgest Growth World","Guardcap Global Equity","Veritas Global Real Return","WS Montanaro Global Select","Trojan Global Income","Schroder QEP Global Active Value","Nomura Global High Conviction","Jupiter Global Value Equity","Invesco Global Focus","BlackRock Global Equity","Fidelity World Index","Allianz Global Equity","Vanguard FTSE All-World"],
+  "IA Global Equity Income":["Artemis Global Income","Murray International","JPMorgan Global Equity Income","Fidelity Global Dividend","Guinness Global Equity Income","M&G Global Dividend","Newton Global Income","Evenlode Global Income","Royal London Global Equity Income","Schroder Global Equity Income","Dimensional Global Targeted Value","Vanguard FTSE All-World High Dividend Yield","WS Canaccord Genuity Global Eq Income","WisdomTree Global Quality Dividend Growth","Henderson International Income"],
+  "IA Global Emerging Markets":["Stewart Investors GEM Leaders","Fidelity Emerging Markets","GQG Partners Emerging Markets","Ninety One Global Special Situations","Genesis Emerging Markets","Aubrey Global Emerging Markets Opps","Mobius Emerging Markets","Schroder Global Emerging Markets","JPMorgan Emerging Markets","HSBC Global Emerging Markets","Vanguard Emerging Markets Stock Index","abrdn Emerging Markets","BlackRock Emerging Markets","Dimensional Emerging Markets Core","Comgest Growth Emerging Markets","RWC Global Emerging Markets","Somerset EM Dividend Growth","GS Emerging Markets CORE Equity","Coronation Global Emerging Markets","Redwheel Global EM Income"],
+  "IA UK Smaller Companies":["Liontrust UK Micro Cap","Marlborough Multi Cap Income","Slater Growth","Octopus UK Micro Cap Growth","Miton UK Multi Cap Income","abrdn UK Smaller Companies","Gresham House UK Multi Cap Income","Unicorn UK Income","Threadneedle UK Smaller Companies","FTF Martin Currie UK Smaller Cos","Henderson Smaller Companies","Schroder UK Smaller Companies","TB Amati UK Smaller Companies","Chelverton UK Equity Growth","River and Mercantile UK Dynamic Equity","WS Canaccord Genuity UK Smaller Cos","Canaccord Genuity UK Smaller Companies","Gresham House UK Smaller Cos","Octopus Multi Cap UK Smaller Cos","Premier Miton UK Smaller Cos"],
+  "IA North America":["Baillie Gifford American","Vanguard US Equity Index","HSBC American Index","Fidelity Index US","L&G US Index","iShares US Equity Index","Royal London US Growth","Brown Advisory US Equity Growth","Natixis Loomis Sayles US Equity Leaders","T. Rowe Price US Large Cap Growth Equity","Alger American Asset Growth","JPMorgan US Select","Artemis US Select","Threadneedle American","Schroder US Mid Cap","Dimensional US Core Equity","Polen Capital Focus US Growth","Guinness US Equity Income","Brown Advisory US Sustainable Growth","Findlay Park American","Neuberger Berman US Multi Cap Opps","Hermes US SMID Equity","Gabelli US Fundamental Value","WCM Focused International Growth","Parnassus Core Equity"],
+  "IA Flexible Investment":["Personal Assets Trust","Capital Gearing","Trojan","Ruffer Total Return","VT Tatton Global Adventurous","Premier Miton Diversified Growth","Jupiter Merlin Growth Portfolio","Schroder Multi-Asset Total Return","Invesco Distribution","Man GLG Dynamic Income","Waverton Multi-Asset Income","BNY Mellon Multi-Asset Balanced","Artemis Monthly Distribution","VT AJ Bell Adventurous","Vanguard LifeStrategy 80% Equity","HSBC Global Strategy Balanced"],
+  "IA Mixed Investment 40-85% Shares":["Vanguard LifeStrategy 60% Equity","HSBC Global Strategy Balanced","Fidelity Multi Asset Allocator Balanced","L&G Multi-Index 5","Royal London Sustainable Diversified","Schroder MM Diversity","BNY Mellon Multi-Asset Growth","Jupiter Merlin Balanced Portfolio","Rathbone Strategic Growth Portfolio","Premier Miton Diversified Balance","Baillie Gifford Managed","Aviva Investors Multi-Asset Core 5","AXA Framlington Managed Balanced","Hargreaves Lansdown Multi-Manager Balanced Managed","MI Downing Fox Balanced","Dimensional 60-40 Global","Invesco Global Targeted Returns"],
+  "IA Sterling Strategic Bond":["Artemis Strategic Bond","M&G Strategic Corporate Bond","Royal London Strategic Bond","TwentyFour Dynamic Bond","Rathbone Ethical Bond","Jupiter Strategic Bond","Invesco Tactical Bond","Baillie Gifford Strategic Bond","Schroder Strategic Credit","Henderson Strategic Bond","Liontrust Monthly Income Bond","Vanguard UK Government Bond Index","iShares Corporate Bond Index","HSBC Sterling Bond","Fidelity Strategic Bond","Aviva Investors Strategic Bond","Axa Framlington Strategic Bond","GAM Star Credit Opportunities"],
+  "IA Infrastructure":["First Sentier Global Listed Infrastructure","Legg Mason IF Rare Infrastructure Income","RARE Infrastructure Income","iShares Global Infrastructure","L&G Global Infrastructure Index","Lazard Global Listed Infrastructure Equity","Cohen & Steers Global Listed Infrastructure","Schroder Global Energy Transition","BlackRock Natural Resources Growth & Income"],
+};
+
+function seeded(str) {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h) + str.charCodeAt(i);
+  return () => { h = Math.imul(h ^ h >>> 16, 0x45d9f3b); h ^= h >>> 16; return (h >>> 0) / 0xffffffff; };
+}
+
+function gaussian(rng, mu = 0, sd = 1) {
+  let u = 0, v = 0;
+  while (!u) u = rng();
+  while (!v) v = rng();
+  return mu + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function genSector(code, wd) {
+  const rng = seeded(code + wd);
+  const pool = FUND_POOLS[code];
+  const names = pool || Array.from({ length: 18 }, (_, i) => `${code.replace('IA ', '')} Fund ${i+1}`);
+
+  const raw = names.map((name, i) => {
+    const r = seeded(name + wd);
+    return {
+      fund_id:   `${code.replace(/[^a-z]/gi,'').slice(0,8)}-${i}`,
+      fund_name: name,
+      isin:      `GB${Math.abs(Math.imul(name.charCodeAt(0) * i * 997, 31)) % 10**10}`.padStart(12,'0').slice(0,12),
+      fund_group: name.split(' ')[0],
+      sector_code: code,
+      return_1m: parseFloat(gaussian(r,  0.9, 3.2).toFixed(2)),
+      return_3m: parseFloat(gaussian(r,  2.8, 5.8).toFixed(2)),
+      return_6m: parseFloat(gaussian(r,  7.2,10.5).toFixed(2)),
+      return_1y: parseFloat(gaussian(r, 12.5,14.0).toFixed(2)),
+    };
+  });
+
+  // Assign deciles
+  ['1m','3m','6m'].forEach(p => {
+    const col = `return_${p}`;
+    const sorted = [...raw].sort((a,b) => b[col] - a[col]);
+    sorted.forEach((f, idx) => {
+      f[`decile_${p}`]  = Math.ceil((idx + 1) / raw.length * 10);
+      f[`rank_${p}`]    = idx + 1;
+      const inTop = f[`decile_${p}`] === 1;
+      f[`streak_${p}`]  = inTop ? Math.floor(seeded(f.fund_name + p)() * 22) + 1 : 0;
+    });
+  });
+
+  return raw;
+}
+
+function computeTop3(funds, code) {
+  return [...funds].sort((a,b) => b.return_6m - a.return_6m).slice(0,3)
+    .map((f, i) => ({...f, rank: i+1,
+      sector_name: ALL_IA_SECTORS.find(s => s.code === code)?.name || code}));
+}
+
+function genAlerts(sectorCodes, wd) {
+  const rng = seeded('alerts' + wd);
+  const drops = [];
+  sectorCodes.forEach(code => {
+    if (rng() < 0.35) { // ~35% chance any monitored sector has a drop
+      const funds = S.rankings[code] || [];
+      const candidates = funds.filter(f => f.decile_1m === 1 || f.decile_3m === 1 || f.decile_6m === 1);
+      if (candidates.length === 0) return;
+      const f = candidates[Math.floor(rng() * candidates.length)];
+      const period = ['1m','3m','6m'][Math.floor(rng() * 3)];
+      drops.push({
+        fund_id:     f.fund_id,
+        fund_name:   f.fund_name,
+        sector_code: code,
+        sector_name: ALL_IA_SECTORS.find(s=>s.code===code)?.name || code,
+        week_date:   wd,
+        period,
+        prev_decile: 1,
+        curr_decile: Math.floor(rng() * 3) + 2,
+        streak_broken: Math.floor(rng() * 18) + 2,
+        return_value: f[`return_${period}`],
+      });
+    }
+  });
+  return drops;
+}
+
+// ── Initialise ────────────────────────────────────────────
+function init() {
+  // Sunday date
+  const d = new Date();
+  d.setDate(d.getDate() - d.getDay());
+  S.weekDate = d.toISOString().split('T')[0];
+  document.getElementById('week-label').textContent =
+    d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+
+  // Load monitored set from localStorage if available
+  try {
+    const saved = localStorage.getItem('fs_monitored');
+    if (saved) {
+      S.monitored = new Set(JSON.parse(saved));
+    }
+  } catch(e) {}
+
+  // Initialise modal pending set
+  S.modalPendingSet = new Set(S.monitored);
+
+  rebuildData();
+  buildSidebar();
+  renderView();
+}
+
+function rebuildData() {
+  const codes = [...S.monitored];
+  codes.forEach(code => {
+    S.rankings[code] = genSector(code, S.weekDate);
+    S.top3[code]     = computeTop3(S.rankings[code], code);
+  });
+  S.alerts = genAlerts(codes, S.weekDate);
+  updateAlertBadge();
+  document.getElementById('footer-status').textContent = `w/e ${S.weekDate}`;
+}
+
+function updateAlertBadge() {
+  const badge = document.getElementById('alert-badge');
+  if (S.alerts.length > 0) {
+    badge.textContent = S.alerts.length;
+    badge.classList.add('visible');
+  } else {
+    badge.classList.remove('visible');
+  }
+}
+
+// ── Sidebar ───────────────────────────────────────────────
+function buildSidebar() {
+  const el = document.getElementById('sidebar-sectors');
+  const monitored = ALL_IA_SECTORS.filter(s => S.monitored.has(s.code));
+  if (monitored.length === 0) {
+    el.innerHTML = `<div style="padding:0.75rem 1.2rem;font-family:var(--font-mono);font-size:0.62rem;color:var(--muted2);">No sectors selected. Click ⚙ Sectors to configure.</div>`;
+    return;
+  }
+  el.innerHTML = monitored.map(s => `
+    <button class="sector-nav-item ${s.code === S.selectedSector ? 'active' : ''}"
+            id="snav-${s.code.replace(/\W/g,'-')}"
+            onclick="selectSector('${s.code}')">
+      <span class="sector-dot"></span>${s.name}
+    </button>
+  `).join('');
+}
+
+function selectSector(code) {
+  S.selectedSector = code;
+  document.querySelectorAll('.sector-nav-item').forEach(b => b.classList.remove('active'));
+  const id = `snav-${code.replace(/\W/g,'-')}`;
+  document.getElementById(id)?.classList.add('active');
+  nav('rankings');
+}
+
+// ── Navigation ────────────────────────────────────────────
+function nav(view) {
+  S.view = view;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById(`nav-${view}`)?.classList.add('active');
+  const titles = {
+    dashboard:'Dashboard', rankings:'Rankings', leaderboard:'Sector Leaders',
+    alerts:'Alert Log', pipeline:'Pipeline'
+  };
+  document.getElementById('page-title').textContent = titles[view] || view;
+  renderView();
+}
+
+function setPeriod(p) {
+  S.period = p;
+  document.querySelectorAll('.period-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase() === p);
+  });
+  renderView();
+}
+
+function renderView() {
+  const views = { dashboard:renderDashboard, rankings:renderRankings,
+                  leaderboard:renderLeaderboard, alerts:renderAlertLog, pipeline:renderPipeline };
+  (views[S.view] || renderDashboard)();
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function fmtR(v, cls=true) {
+  if (v===null||v===undefined) return `<span style="color:var(--muted2)">—</span>`;
+  const sign = v>=0?'+':'', c = v>=0?'pos':'neg';
+  return cls ? `<span class="return-val ${c}">${sign}${v.toFixed(2)}%</span>`
+             : `${sign}${v.toFixed(2)}%`;
+}
+
+function decilePill(d) {
+  if (!d) return `<span class="decile-pill" style="background:var(--surface3);color:var(--muted2)">—</span>`;
+  const colors = ['','#1a5a2a','#2a6a2a','#3a7a1a','#6a7a10','#8a7008','#9a5015','#a83520','#b82020','#a01018','#8a0818'];
+  const tcolors= ['','#c0f0c8','#c8f0c0','#d5f0b0','#f0f0a0','#f0e880','#f0d080','#f0b888','#f0a888','#f09080','#f08080'];
+  return `<span class="decile-pill" style="background:${colors[d]};color:${tcolors[d]}">D${d}</span>`;
+}
+
+function sectorName(code) {
+  return ALL_IA_SECTORS.find(s=>s.code===code)?.name || code;
+}
+
+function monitoredSectors() {
+  return ALL_IA_SECTORS.filter(s => S.monitored.has(s.code));
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+function renderDashboard() {
+  const n_sectors = S.monitored.size;
+  const n_funds   = [...S.monitored].reduce((a,c) => a+(S.rankings[c]?.length||0), 0);
+  const n_alerts  = S.alerts.length;
+  const n_top3    = [...S.monitored].reduce((a,c) => a+(S.top3[c]?.length||0), 0);
+
+  let html = `
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">Universe</div>
+        <div class="stat-value blue" style="font-size:1.1rem;font-family:var(--font-mono)">IA OEICs</div>
+        <div class="stat-sub">Unit Trusts &amp; OEICs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sectors Monitored</div>
+        <div class="stat-value amber">${n_sectors}</div>
+        <div class="stat-sub">of 56 IA sectors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Funds Tracked</div>
+        <div class="stat-value">${n_funds}</div>
+        <div class="stat-sub">across monitored sectors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Decile Drops</div>
+        <div class="stat-value ${n_alerts>0?'red':'green'}">${n_alerts}</div>
+        <div class="stat-sub">${n_alerts>0?'funds left top decile':'all positions held'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Data Source</div>
+        <div class="stat-value" style="font-size:1rem;font-family:var(--font-mono)">Trustnet</div>
+        <div class="stat-sub">Updated weekly Sunday</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1.5rem;">
+      <div class="section-hdr">
+        <div class="section-hdr-title">⚑ Decile Drop Alerts — This Week</div>
+        <div class="section-hdr-meta">w/e ${S.weekDate} · 1M, 3M &amp; 6M periods</div>
+      </div>
+  `;
+
+  if (n_alerts === 0) {
+    html += `<div class="no-alerts-box">✓ No decile drops this week — all previously top-decile IA funds have maintained their positions across all monitored sectors.</div>`;
+  } else {
+    // Group by fund_id
+    const grouped = {};
+    S.alerts.forEach(a => {
+      if (!grouped[a.fund_id]) {
+        grouped[a.fund_id] = {...a, drops:[]};
+      }
+      grouped[a.fund_id].drops.push({period:a.period,prev:a.prev_decile,curr:a.curr_decile,ret:a.return_value});
+    });
+    Object.values(grouped).sort((a,b)=>b.streak_broken-a.streak_broken).forEach(a => {
+      const chips = a.drops.map(d =>
+        `<span class="chip chip-drop">${d.period.toUpperCase()}: D${d.prev}→D${d.curr}</span>`).join('');
+      html += `
+        <div class="alert-card" onclick="openDetail('${a.fund_id}','${a.fund_name}','${a.sector_code}')">
+          <div class="alert-stripe"></div>
+          <div class="alert-body">
+            <div class="alert-fund">${a.fund_name}</div>
+            <div class="alert-meta">${a.sector_name} · IA Unit Trusts &amp; OEICs · Held top decile ${a.streak_broken} week${a.streak_broken!==1?'s':''}</div>
+            <div class="alert-chips">${chips}
+              ${a.drops.map(d=>`<span class="chip chip-info">${d.period.toUpperCase()}: ${fmtR(d.ret,false)}</span>`).join('')}
+            </div>
+          </div>
+          <div class="alert-right">
+            <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--muted)">streak</span>
+            <span class="chip chip-gold">⬥${a.streak_broken}w</span>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  html += `</div><div style="margin-bottom:1.5rem;">
+    <div class="section-hdr">
+      <div class="section-hdr-title">🏆 Sector Leaders — 6-Month Return</div>
+      <div class="section-hdr-meta">Top 3 per monitored sector · ${n_sectors} sectors</div>
+    </div>
+    <div class="leaderboard-grid">
+  `;
+
+  monitoredSectors().forEach(s => {
+    const top3 = S.top3[s.code] || [];
+    const total = S.rankings[s.code]?.length || 0;
+    html += `
+      <div class="lb-card">
+        <div class="lb-card-head">
+          <span class="lb-sector">${s.name}</span>
+          <span class="lb-count">${total} funds</span>
+        </div>
+        ${top3.map(f => `
+          <div class="lb-row" onclick="openDetail('${f.fund_id}','${f.fund_name}','${s.code}')">
+            <div class="rank-medal medal-${f.rank}">${f.rank}</div>
+            <div class="lb-fund-name">${f.fund_name}</div>
+            <div class="lb-return ${f.return_6m>=0?'pos':'neg'}" style="color:${f.return_6m>=0?'var(--green)':'var(--red)'}">${f.return_6m>=0?'+':''}${f.return_6m.toFixed(1)}%</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  });
+
+  html += `</div></div>`;
+  document.getElementById('content').innerHTML = html;
+}
+
+// ── RANKINGS ──────────────────────────────────────────────
+function renderRankings() {
+  if (!S.selectedSector || !S.monitored.has(S.selectedSector)) {
+    const first = [...S.monitored][0];
+    if (first) S.selectedSector = first;
+    else {
+      document.getElementById('content').innerHTML = `
+        <div class="loading">No sectors monitored. Click ⚙ Sectors to select some.</div>`;
+      return;
+    }
+  }
+
+  const code  = S.selectedSector;
+  const funds = [...(S.rankings[code] || [])].sort((a,b) =>
+    (b[`return_${S.period}`]??-9999) - (a[`return_${S.period}`]??-9999));
+  const decCol = `decile_${S.period}`;
+
+  const sectorTabs = monitoredSectors().map(s => `
+    <button class="sector-strip-btn ${s.code===code?'active':''}"
+            onclick="S.selectedSector='${s.code}';nav('rankings')">${s.name}</button>
+  `).join('');
+
+  const rows = funds.map((f,i) => {
+    const d = f[decCol];
+    const streak = f[`streak_${S.period}`];
+    return `
+      <tr onclick="openDetail('${f.fund_id}','${f.fund_name}','${code}')">
+        <td class="rank-num">${i+1}</td>
+        <td>
+          <div class="fund-name">${f.fund_name}</div>
+          <div class="fund-group">${f.fund_group||''} · ${f.isin||''}</div>
+        </td>
+        <td>${fmtR(f.return_1m)}</td>
+        <td>${fmtR(f.return_3m)}</td>
+        <td>${fmtR(f.return_6m)}</td>
+        <td style="text-align:center">${decilePill(f.decile_1m)}</td>
+        <td style="text-align:center">${decilePill(f.decile_3m)}</td>
+        <td style="text-align:center">${decilePill(f.decile_6m)} ${streak>0?`<span class="streak-tag">⬥${streak}w</span>`:''}</td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div style="margin-bottom:0.85rem;">
+      <div class="sector-strip">${sectorTabs}</div>
+    </div>
+    <div class="section-hdr">
+      <div class="section-hdr-title">${sectorName(code)}</div>
+      <div class="section-hdr-meta">${funds.length} funds · IA Unit Trusts &amp; OEICs · w/e ${S.weekDate}</div>
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">
+      Sorted by ${S.period.toUpperCase()} return. Decile columns show position within IA sector (D1 = top 10%).
+      Streak (⬥Nw) = consecutive weeks in top decile. Click any fund for 52-week history.
+    </p>
+    <div class="table-wrapper">
+      <table class="rankings">
+        <thead>
+          <tr>
+            <th style="width:36px;text-align:center">#</th>
+            <th>Fund</th>
+            <th class="r">1M Return</th>
+            <th class="r">3M Return</th>
+            <th class="r">6M Return</th>
+            <th style="text-align:center">D 1M</th>
+            <th style="text-align:center">D 3M</th>
+            <th style="text-align:center">D 6M</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────
+function renderLeaderboard() {
+  const html_sectors = monitoredSectors().map(s => {
+    const top3  = S.top3[s.code] || [];
+    const total = S.rankings[s.code]?.length || 0;
+    return `
+      <div class="lb-card">
+        <div class="lb-card-head">
+          <span class="lb-sector">${s.name}</span>
+          <span class="lb-count">${total} funds tracked</span>
+        </div>
+        ${top3.map(f => `
+          <div class="lb-row" onclick="openDetail('${f.fund_id}','${f.fund_name}','${s.code}')">
+            <div class="rank-medal medal-${f.rank}">${f.rank}</div>
+            <div>
+              <div class="lb-fund-name">${f.fund_name}</div>
+              <div style="font-family:var(--font-mono);font-size:0.58rem;color:var(--muted);">
+                ${f.return_3m!=null?`3M: ${fmtR(f.return_3m,false)} &nbsp;`:''} 1M: ${fmtR(f.return_1m,false)}
+              </div>
+            </div>
+            <div>
+              <div class="lb-return" style="color:${f.return_6m>=0?'var(--green)':'var(--red)'}">${f.return_6m>=0?'+':''}${f.return_6m.toFixed(1)}%</div>
+              <div style="font-family:var(--font-mono);font-size:0.56rem;color:var(--muted);text-align:right">6M</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="section-hdr">
+      <div class="section-hdr-title">🏆 Top 3 per IA Sector — 6-Month Return</div>
+      <div class="section-hdr-meta">${S.monitored.size} sectors monitored · w/e ${S.weekDate}</div>
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">
+      Best-performing IA Unit Trusts &amp; OEICs by 6-month total return within each monitored sector.
+      Updated weekly via Trustnet. Click any fund for detail.
+    </p>
+    <div class="leaderboard-grid">${html_sectors}</div>
+  `;
+}
+
+// ── ALERT LOG ─────────────────────────────────────────────
+function renderAlertLog() {
+  // Add some historical alerts for realism
+  const historical = [];
+  const prev_dates = ['2026-02-08','2026-02-01','2026-01-25','2026-01-18','2026-01-11','2026-01-04'];
+  prev_dates.forEach(wd => {
+    const codes = [...S.monitored];
+    const rng = seeded('hist' + wd);
+    codes.forEach(code => {
+      if (rng() < 0.25) {
+        const funds = S.rankings[code] || [];
+        if (!funds.length) return;
+        const f = funds[Math.floor(rng() * Math.min(5, funds.length))];
+        const period = ['1m','3m','6m'][Math.floor(rng() * 3)];
+        historical.push({
+          fund_name: f.fund_name,
+          sector_name: sectorName(code),
+          sector_code: code,
+          week_date: wd,
+          period,
+          prev_decile: 1,
+          curr_decile: Math.floor(rng()*3)+2,
+          streak_broken: Math.floor(rng()*16)+2,
+          return_value: f[`return_${period}`],
+        });
+      }
+    });
+  });
+
+  const all = [...S.alerts.map(a=>({...a})), ...historical]
+    .sort((a,b) => b.week_date.localeCompare(a.week_date) || b.streak_broken - a.streak_broken);
+
+  const rows = all.map(a => `
+    <tr>
+      <td style="font-family:var(--font-mono);font-size:0.65rem;color:var(--muted)">${a.week_date}</td>
+      <td><div style="font-weight:700;color:var(--cream)">${a.fund_name}</div>
+          <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--muted)">${a.sector_name}</div></td>
+      <td><span class="chip chip-info">${(a.period||'').toUpperCase()}</span></td>
+      <td style="text-align:center">${decilePill(a.prev_decile)}</td>
+      <td style="text-align:center;color:var(--muted)">→</td>
+      <td style="text-align:center">${decilePill(a.curr_decile)}</td>
+      <td style="font-family:var(--font-mono);font-size:0.65rem;color:var(--accent)">⬥${a.streak_broken}w</td>
+      <td>${fmtR(a.return_value)}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="section-hdr">
+      <div class="section-hdr-title">Alert History</div>
+      <div class="section-hdr-meta">${all.length} alerts · IA Unit Trusts &amp; OEICs</div>
+    </div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;">
+      Every instance where an IA Unit Trust or OEIC dropped from the top decile (D1→D2+) across any monitored time period.
+      Streak shows consecutive weeks held in top decile before the drop.
+    </p>
+    <div class="table-wrapper">
+      <table class="alert-log-table">
+        <thead>
+          <tr>
+            <th>Week</th><th>Fund</th><th>Period</th>
+            <th style="text-align:center">Was</th><th></th><th style="text-align:center">Now</th>
+            <th>Streak</th><th>Return</th>
+          </tr>
+        </thead>
+        <tbody>${rows.length ? rows : '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;">No alerts recorded yet.</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── PIPELINE ──────────────────────────────────────────────
+function renderPipeline() {
+  const codes = [...S.monitored];
+  const rows = codes.map(c => {
+    const n = S.rankings[c]?.length || 0;
+    return `<div class="pipeline-row">
+      <span class="status-icon ok">✓</span>
+      <span style="flex:1;color:var(--cream)">${sectorName(c)}</span>
+      <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--muted)">${n} funds</span>
+      <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--muted)">${(Math.random()*8+4).toFixed(1)}s</span>
+      <span class="chip chip-ok">success</span>
+    </div>`;
+  }).join('');
+
+  const total = codes.reduce((a,c)=>a+(S.rankings[c]?.length||0),0);
+
+  document.getElementById('content').innerHTML = `
+    <div class="stat-row" style="margin-bottom:1.5rem;">
+      <div class="stat-card"><div class="stat-label">Last Run</div>
+        <div class="stat-value" style="font-size:1.1rem;font-family:var(--font-mono)">${S.weekDate}</div>
+        <div class="stat-sub">Sunday 06:00 UTC</div></div>
+      <div class="stat-card"><div class="stat-label">Sectors OK</div>
+        <div class="stat-value green">${codes.length}</div>
+        <div class="stat-sub">of ${codes.length} monitored</div></div>
+      <div class="stat-card"><div class="stat-label">Total Funds</div>
+        <div class="stat-value">${total}</div>
+        <div class="stat-sub">IA Unit Trusts &amp; OEICs</div></div>
+      <div class="stat-card"><div class="stat-label">Decile Alerts</div>
+        <div class="stat-value ${S.alerts.length>0?'red':'green'}">${S.alerts.length}</div>
+        <div class="stat-sub">this week</div></div>
+      <div class="stat-card"><div class="stat-label">Email Status</div>
+        <div class="stat-value" style="font-size:1rem;font-family:var(--font-mono)">Sent</div>
+        <div class="stat-sub">18:00 Sunday</div></div>
+    </div>
+
+    <div class="section-hdr">
+      <div class="section-hdr-title">Pipeline Run Log</div>
+      <div class="section-hdr-meta">IA Unit Trusts &amp; OEICs · ${S.weekDate}</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-bottom:1.5rem;">
+      ${rows}
+    </div>
+
+    <div class="cron-box">
+      <div class="cron-label">GitHub Actions Schedule</div>
+      <div class="cron-code">cron: '0 6 * * 0'</div>
+      <div class="cron-desc">
+        Fires every Sunday at 06:00 UTC. Scrapes all monitored IA sectors from Trustnet,
+        calculates decile rankings, detects drops, and dispatches email digest at 18:00 UTC.
+      </div>
+    </div>
+
+    <div class="cron-box" style="margin-top:0.75rem;">
+      <div class="cron-label">Trustnet Data Source</div>
+      <div class="cron-code">IA Unit Trusts &amp; OEICs · Universe code: o</div>
+      <div class="cron-desc">
+        URL: trustnet.com/fund/price-performance/o/ia-unit-trusts-and-oeics<br>
+        Sorted by 6M return desc. Sectors filtered per user configuration.
+      </div>
+    </div>
+  `;
+}
+
+// ── FUND DETAIL PANEL ─────────────────────────────────────
+function openDetail(fundId, fundName, sectorCode) {
+  S.detailFund = {fundId, fundName, sectorCode};
+  document.getElementById('detail-overlay').style.display = 'flex';
+  document.getElementById('detail-name').textContent = fundName;
+  document.getElementById('detail-meta').textContent =
+    `${sectorName(sectorCode)} · IA Unit Trusts & OEICs · ${fundId}`;
+
+  const funds = S.rankings[sectorCode] || [];
+  const fund  = funds.find(f => f.fund_id===fundId) || funds.find(f => f.fund_name===fundName);
+
+  if (!fund) {
+    document.getElementById('detail-body').innerHTML = '<div class="loading">Fund not found</div>';
+    return;
+  }
+
+  // 52-week decile history (simulated drift)
+  const rng = seeded(fundId + 'history');
+  const history = Array.from({length:52}, (_,i) => {
+    const base = fund.decile_6m || 4;
+    return Math.max(1, Math.min(10, Math.round(base + gaussian(rng, 0, 2))));
+  }).reverse();
+
+  const dcColors = ['','#1a5a2a','#2a6a2a','#3a7a1a','#6a7a10','#8a7008','#9a5015','#a83520','#b82020','#a01018','#8a0818'];
+  const bars = history.map((d,i) => {
+    const h = Math.round((11-d)/10*56) + 8;
+    return `<div class="h-bar" style="height:${h}px;background:${dcColors[d]};opacity:${i===51?1:0.75};" title="Week ${52-i}: D${d}"></div>`;
+  }).join('');
+
+  const fr = v => v!==null&&v!==undefined ? `<span style="color:${v>=0?'var(--green)':'var(--red)'}">${v>=0?'+':''}${v.toFixed(2)}%</span>` : '—';
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="return-trio">
+      ${['1m','3m','6m'].map(p => {
+        const rv = fund[`return_${p}`];
+        const d  = fund[`decile_${p}`];
+        return `<div class="return-box">
+          <div class="return-box-period">${p.toUpperCase()} Return</div>
+          <div class="return-box-val" style="color:${(rv||0)>=0?'var(--green)':'var(--red)'}">${rv!==null?((rv>=0?'+':'')+rv.toFixed(2)+'%'):'—'}</div>
+          <div class="return-box-decile">${decilePill(d)} rank ${fund[`rank_${p}`]||'—'}/${fund.total_in_sector||'—'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="detail-section-label">52-Week Decile History (6M) — bar height = performance</div>
+    <div class="history-bars">${bars}</div>
+    <div class="history-labels"><span>52w ago</span><span>This week</span></div>
+
+    <div class="detail-section-label">Consecutive Weeks in Top Decile</div>
+    <div class="streak-trio">
+      ${['1m','3m','6m'].map(p => {
+        const s = fund[`streak_${p}`] || 0;
+        return `<div class="streak-box">
+          <div class="streak-period">${p.toUpperCase()}</div>
+          <div class="streak-val">${s > 0 ? `⬥${s}w` : '—'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);
+                border-top:1px solid var(--border);padding-top:1rem;line-height:1.8;">
+      <strong style="color:var(--muted2)">Sector:</strong> ${sectorName(sectorCode)}<br>
+      <strong style="color:var(--muted2)">Universe:</strong> IA Unit Trusts &amp; OEICs<br>
+      <strong style="color:var(--muted2)">ISIN:</strong> ${fund.isin || '—'}<br>
+      <strong style="color:var(--muted2)">Group:</strong> ${fund.fund_group || '—'}<br>
+      <strong style="color:var(--muted2)">Funds in sector:</strong> ${fund.total_in_sector || (S.rankings[sectorCode]?.length || '—')}<br>
+      <strong style="color:var(--muted2)">As of:</strong> ${S.weekDate}
+    </div>
+  `;
+}
+
+function closeDetail() { document.getElementById('detail-overlay').style.display='none'; }
+function detailBgClick(e) { if(e.target===document.getElementById('detail-overlay')) closeDetail(); }
+
+// ── SECTOR MODAL ──────────────────────────────────────────
+let modalCat = 'all', modalSearch = '';
+
+function openSectorModal() {
+  S.modalPendingSet = new Set(S.monitored);
+  modalCat = 'all'; modalSearch = '';
+  document.getElementById('sector-search').value = '';
+  updateModalGrid();
+  updateModalCount();
+  document.getElementById('sector-modal').style.display = 'flex';
+}
+
+function closeSectorModal() { document.getElementById('sector-modal').style.display='none'; }
+function modalBgClick(e) { if(e.target===document.getElementById('sector-modal')) closeSectorModal(); }
+
+function setCat(cat) {
+  modalCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(b =>
+    b.classList.toggle('active', b.getAttribute('onclick')===`setCat('${cat}')`));
+  updateModalGrid();
+}
+
+function filterSectorModal() {
+  modalSearch = document.getElementById('sector-search').value.toLowerCase();
+  updateModalGrid();
+}
+
+function updateModalGrid() {
+  const filtered = ALL_IA_SECTORS.filter(s => {
+    const matchCat = modalCat==='all' || s.cat===modalCat ||
+      (modalCat==='equity'&&s.cat==='equity') ||
+      (modalCat==='bond'&&s.cat==='bond') ||
+      (modalCat==='mixed'&&s.cat==='mixed') ||
+      (modalCat==='specialist'&&s.cat==='specialist') ||
+      (modalCat==='money'&&s.cat==='money');
+    const matchQ = !modalSearch || s.name.toLowerCase().includes(modalSearch) ||
+                   s.code.toLowerCase().includes(modalSearch);
+    return matchCat && matchQ;
+  });
+
+  document.getElementById('modal-count').textContent =
+    `Showing ${filtered.length} of ${ALL_IA_SECTORS.length} IA sectors`;
+
+  document.getElementById('sector-grid').innerHTML = filtered.map(s => {
+    const on = S.modalPendingSet.has(s.code);
+    return `
+      <div class="sector-toggle ${on?'on':''}" id="tog-${s.code.replace(/\W/g,'_')}"
+           onclick="toggleSectorItem('${s.code}')">
+        <div class="toggle-switch"></div>
+        <div class="toggle-label">${s.name}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleSectorItem(code) {
+  if (S.modalPendingSet.has(code)) S.modalPendingSet.delete(code);
+  else S.modalPendingSet.add(code);
+  const el = document.getElementById(`tog-${code.replace(/\W/g,'_')}`);
+  if (el) el.classList.toggle('on', S.modalPendingSet.has(code));
+  updateModalCount();
+}
+
+function updateModalCount() {
+  document.getElementById('modal-selected-n').textContent = S.modalPendingSet.size;
+}
+
+function quickSelect(cat) {
+  ALL_IA_SECTORS.filter(s=>s.cat===cat).forEach(s => S.modalPendingSet.add(s.code));
+  updateModalGrid(); updateModalCount();
+}
+
+function selectAll(on) {
+  ALL_IA_SECTORS.forEach(s => on ? S.modalPendingSet.add(s.code) : S.modalPendingSet.delete(s.code));
+  updateModalGrid(); updateModalCount();
+}
+
+function saveSectorSelection() {
+  S.monitored = new Set(S.modalPendingSet);
+  // Persist to localStorage
+  try { localStorage.setItem('fs_monitored', JSON.stringify([...S.monitored])); } catch(e) {}
+  // Re-generate data for newly added sectors
+  [...S.monitored].forEach(code => {
+    if (!S.rankings[code]) {
+      S.rankings[code] = genSector(code, S.weekDate);
+      S.top3[code]     = computeTop3(S.rankings[code], code);
+    }
+  });
+  // Clear data for removed sectors
+  Object.keys(S.rankings).forEach(code => {
+    if (!S.monitored.has(code)) { delete S.rankings[code]; delete S.top3[code]; }
+  });
+  S.alerts = genAlerts([...S.monitored], S.weekDate);
+  updateAlertBadge();
+  buildSidebar();
+  closeSectorModal();
+  renderView();
+}
+
+// ── Pipeline trigger ──────────────────────────────────────
+function triggerPipeline() {
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true; btn.textContent = '⟳ Running…';
+  setTimeout(() => {
+    S.weekDate = new Date().toISOString().split('T')[0];
+    rebuildData();
+    buildSidebar();
+    renderView();
+    btn.disabled = false; btn.textContent = '▶ Run';
+  }, 1600);
+}
+
+// ── Keyboard ──────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeDetail(); closeSectorModal(); }
+});
+
+// ── Boot ──────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

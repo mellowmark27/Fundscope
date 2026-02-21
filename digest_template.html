@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FundScope Weekly — {{ week_date }}</title>
+<style>
+  body { margin: 0; padding: 0; background: #f0ece3; font-family: Georgia, 'Times New Roman', serif; }
+  .wrapper { max-width: 640px; margin: 0 auto; background: #f0ece3; }
+
+  /* Header */
+  .header { background: #1a4d6e; padding: 28px 32px; }
+  .header-eyebrow { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.2em; color: #7fb3d3; text-transform: uppercase; margin-bottom: 6px; }
+  .header-title { font-size: 22px; color: #ffffff; margin: 0; font-weight: normal; }
+  .header-date { font-family: 'Courier New', monospace; font-size: 11px; color: #a8c8e0; margin-top: 4px; }
+
+  /* Summary bar */
+  .summary-bar { background: #0e0e0e; padding: 12px 32px; display: flex; gap: 24px; }
+  .summary-stat { color: #fff; }
+  .summary-stat .num { font-family: 'Courier New', monospace; font-size: 18px; color: #c84b2f; }
+  .summary-stat .lbl { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 0.12em; color: #888; text-transform: uppercase; display: block; }
+
+  /* Content area */
+  .content { padding: 28px 32px; }
+
+  /* Section labels */
+  .section-label { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #c84b2f; padding: 20px 0 8px; border-top: 1px solid #c8c2b4; margin-top: 20px; }
+  .section-label:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+
+  /* Alert rows */
+  .alert-row { border-left: 3px solid #c84b2f; background: #fff8f5; padding: 12px 14px; margin-bottom: 6px; }
+  .alert-fund-name { font-size: 14px; color: #0e0e0e; font-weight: bold; margin-bottom: 2px; }
+  .alert-meta { font-family: 'Courier New', monospace; font-size: 10px; color: #7a7265; }
+  .alert-badges { margin-top: 6px; }
+  .badge { display: inline-block; font-family: 'Courier New', monospace; font-size: 10px; padding: 2px 6px; background: #c84b2f; color: #fff; margin-right: 4px; }
+  .badge-drop { background: #c84b2f; }
+  .badge-info { background: #1a4d6e; }
+
+  /* No drops */
+  .no-drops { background: #f0f7f0; border-left: 3px solid #4a9a5a; padding: 12px 14px; font-size: 13px; color: #3a6a3a; margin-bottom: 6px; }
+
+  /* Top 3 tables */
+  .sector-block { margin-bottom: 16px; }
+  .sector-name-label { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.1em; color: #1a4d6e; text-transform: uppercase; margin-bottom: 4px; font-weight: bold; }
+  .top3-table { width: 100%; border-collapse: collapse; }
+  .top3-table td { padding: 7px 10px; font-size: 12px; border-bottom: 1px solid #e5e0d8; }
+  .top3-table tr:last-child td { border-bottom: none; }
+  .top3-table tr:nth-child(1) { background: #fffbf0; }
+  .top3-table tr:nth-child(2) { background: #fafaf7; }
+  .top3-table tr:nth-child(3) { background: #f8f8f6; }
+  .rank-circle { display: inline-block; width: 20px; height: 20px; border-radius: 50%; text-align: center; line-height: 20px; font-family: 'Courier New', monospace; font-size: 10px; color: #fff; font-weight: bold; margin-right: 6px; }
+  .rank-1 { background: #b8933a; }
+  .rank-2 { background: #9a9a9a; }
+  .rank-3 { background: #b87333; }
+  .return-val { font-family: 'Courier New', monospace; font-size: 12px; color: #1a4d6e; font-weight: bold; }
+  .return-positive { color: #2a7a2a; }
+  .return-negative { color: #c84b2f; }
+
+  /* Disclaimer */
+  .disclaimer { font-size: 10px; color: #9a9288; border-top: 1px solid #c8c2b4; padding-top: 16px; margin-top: 24px; line-height: 1.5; }
+  .disclaimer a { color: #9a9288; }
+
+  /* Failure notice */
+  .failure-notice { background: #fff8f0; border-left: 3px solid #e8a020; padding: 10px 14px; font-size: 12px; color: #7a5010; margin-bottom: 8px; font-family: 'Courier New', monospace; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-eyebrow">FundScope Weekly Digest</div>
+    <h1 class="header-title">Fund Performance Monitor</h1>
+    <div class="header-date">Week ending {{ week_date_display }} &nbsp;·&nbsp; {{ sector_count }} sectors monitored</div>
+  </div>
+
+  <!-- Summary bar -->
+  <table style="width:100%;background:#0e0e0e;padding:0;border-collapse:collapse;">
+    <tr>
+      <td style="padding:14px 20px;text-align:center;border-right:1px solid #333;">
+        <div style="font-family:'Courier New',monospace;font-size:22px;color:{% if drop_count > 0 %}#c84b2f{% else %}#4a9a5a{% endif %};">{{ drop_count }}</div>
+        <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;color:#888;text-transform:uppercase;">Decile Drops</div>
+      </td>
+      <td style="padding:14px 20px;text-align:center;border-right:1px solid #333;">
+        <div style="font-family:'Courier New',monospace;font-size:22px;color:#ffffff;">{{ total_funds }}</div>
+        <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;color:#888;text-transform:uppercase;">Funds Tracked</div>
+      </td>
+      <td style="padding:14px 20px;text-align:center;border-right:1px solid #333;">
+        <div style="font-family:'Courier New',monospace;font-size:22px;color:#ffffff;">{{ sector_count }}</div>
+        <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;color:#888;text-transform:uppercase;">Sectors</div>
+      </td>
+      <td style="padding:14px 20px;text-align:center;">
+        <div style="font-family:'Courier New',monospace;font-size:22px;color:#7fb3d3;">{{ top3_count }}</div>
+        <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;color:#888;text-transform:uppercase;">Leaders Tracked</div>
+      </td>
+    </tr>
+  </table>
+
+  <div class="content">
+
+    {% if failed_sectors %}
+    <!-- Data failure notices -->
+    {% for sector_name in failed_sectors %}
+    <div class="failure-notice">⚠ Data unavailable this week: {{ sector_name }} — no alert will fire for this sector.</div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Decile Drop Alerts -->
+    <div class="section-label">⚠ Decile Drop Alerts — This Week</div>
+
+    {% if drop_count == 0 %}
+    <div class="no-drops">✓ No decile drops this week — all previously top-decile funds have maintained their positions across all monitored sectors.</div>
+    {% else %}
+    <p style="font-size:12px;color:#7a7265;margin-bottom:12px;font-family:'Courier New',monospace;">{{ drop_count }} fund{{ 's' if drop_count != 1 else '' }} dropped out of the top decile this week.</p>
+
+    {% for alert in alerts %}
+    <div class="alert-row">
+      <div class="alert-fund-name">{{ alert.fund_name }}</div>
+      <div class="alert-meta">{{ alert.sector_name }} &nbsp;·&nbsp; Held top position {{ alert.streak_broken }} week{{ 's' if alert.streak_broken != 1 else '' }}</div>
+      <div class="alert-badges" style="margin-top:6px;">
+        {% for drop in alert.drops %}
+        <span class="badge badge-drop">{{ drop.period | upper }}: D{{ drop.prev_decile }}→D{{ drop.curr_decile }}</span>
+        {% endfor %}
+        <span style="font-family:'Courier New',monospace;font-size:10px;color:#7a7265;margin-left:4px;">
+          {% for drop in alert.drops %}
+            {{ drop.period | upper }} return: {% if drop.return_value >= 0 %}<span style="color:#2a7a2a;">+{{ "%.1f"|format(drop.return_value) }}%</span>{% else %}<span style="color:#c84b2f;">{{ "%.1f"|format(drop.return_value) }}%</span>{% endif %}
+          {% endfor %}
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Sector Top 3 Leaderboards (6-Month) -->
+    <div class="section-label">🏆 Sector Leaderboards — Top 3 by 6-Month Return</div>
+
+    {% for sector_code, top3 in top3_by_sector.items() %}
+    {% if top3 %}
+    <div class="sector-block">
+      <div class="sector-name-label">{{ top3[0].sector_name }}</div>
+      <table class="top3-table">
+        {% for fund in top3 %}
+        <tr>
+          <td>
+            <span class="rank-circle rank-{{ fund.rank }}">{{ fund.rank }}</span>
+            {{ fund.fund_name }}
+          </td>
+          <td style="text-align:right;">
+            <span class="return-val {% if fund.return_6m >= 0 %}return-positive{% else %}return-negative{% endif %}">
+              {% if fund.return_6m >= 0 %}+{% endif %}{{ "%.1f"|format(fund.return_6m) }}%
+            </span>
+            <span style="font-family:'Courier New',monospace;font-size:9px;color:#aaa;margin-left:4px;">6M</span>
+          </td>
+          <td style="text-align:right;color:#9a9288;font-family:'Courier New',monospace;font-size:10px;">
+            {% if fund.return_3m is not none %}
+              {% if fund.return_3m >= 0 %}+{% endif %}{{ "%.1f"|format(fund.return_3m) }}% 3M
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      FundScope is an automated monitoring tool. Data sourced from Trustnet.
+      <strong>Past performance is not a reliable indicator of future results.</strong>
+      This digest is for informational purposes only and does not constitute financial advice.
+      Always consult a qualified financial adviser before making investment decisions.<br><br>
+      You are receiving this because you are a configured recipient.
+      To unsubscribe, remove your email from config/sectors.yaml.
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
